@@ -18,4 +18,3 @@ RUN rm -rf /tmp/*
 
 RUN pip3 install -r /opt/iris/python/src/requirements.txt --target /opt/iris/python/lib
 ENV PYTHONPATH="/opt/iris/python/src:/opt/iris/python/lib"
-ENV ISC_DATA_DIRECTORY="/persistent/iris"
