@@ -1,0 +1,3 @@
+zn "PROPHAT"
+do $SYSTEM.OBJ.LoadDir("/opt/iris/cls", "ck", ,1)
+halt

@@ -1,0 +1,23 @@
+ZN "%SYS"
+
+set nsName = "PROPHAT"
+set dataDbName = nsName_"_DATA"
+set codeDbName = nsName_"_CODE"
+set dataDbDirectory = "/usr/irissys/mgr/"_dataDbName_"/"
+set codeDbDirectory = "/usr/irissys/mgr/"_codeDbName_"/"
+
+w ##class(%File).CreateDirectoryChain(dataDbName)
+w ##class(SYS.Database).CreateDatabase(dataDbDirectory)
+set dataDbProperties("Directory") = dataDbDirectory
+w ##class(Config.Databases).Create(dataDbName, .dataDbProperties)
+
+w ##class(%File).CreateDirectoryChain(codeDbName)
+w ##class(SYS.Database).CreateDatabase(codeDbDirectory)
+set codeDbProperties("Directory") = codeDbDirectory
+w ##class(Config.Databases).Create(codeDbName, .codeDbProperties)
+
+set nsProperties("Globals") = dataDbName
+set nsProperties("Routines") = codeDbName
+w ##class(Config.Namespaces).Create(nsName, .nsProperties)
+
+halt

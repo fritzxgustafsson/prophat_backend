@@ -3,6 +3,8 @@ Class PH.Service Extends %CSP.REST
 
 Parameter CONTENTTYPE = "application/json";
 
+Parameter SECURITYRESOURCE;
+
 XData UrlMap
 {
 <Routes>

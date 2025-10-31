@@ -1,0 +1,34 @@
+{
+    "folders": [
+        { "path": "./src" },
+        { "path": "./docker" }
+    ],
+    "settings": {
+        "intersystems.servers": {
+            "dockeriris": {
+                "webServer": {
+                    "scheme": "http",
+                    "host": "localhost",
+                    "port": 80
+                },
+                "username": "_SYSTEM",
+                "password": "localdev"
+            }
+        },
+        "objectscript.conn": {
+            "server": "dockeriris",
+            "ns": "PROPHAT",
+            "active": true
+        },
+        "objectscript.export": {
+            "folder": "cls"
+        },
+        "objectscript.compileOnSave": true,
+        "objectscript.overwriteServerChanges": true,
+        "workbench.colorTheme": "InterSystems Default Dark Modern",
+        "python.analysis.extraPaths": [
+            "/opt/prophat/prophat_backend/src/python",
+            "/opt/prophat/prophat_backend/pythonlib"
+        ]
+    }
+}
