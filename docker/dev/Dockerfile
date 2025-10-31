@@ -19,3 +19,4 @@ RUN rm -rf /tmp/*
 
 ENV PYTHONPATH="/opt/iris/python/src:/opt/iris/python/lib"
 ENV ISC_DATA_DIRECTORY="/persistent/iris"
+ENV PYTHONDONTWRITEBYTECODE=1
