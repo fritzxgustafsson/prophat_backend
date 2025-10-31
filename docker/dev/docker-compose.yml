@@ -1,5 +1,8 @@
 services:
   iris:
+    build:
+      context: /opt/prophat/prophat_backend
+      dockerfile: docker/dev/Dockerfile
     image: prophat-dev:latest
     container_name: iris
     hostname: iris
@@ -7,7 +10,14 @@ services:
       - /opt/prophat/persistent/db:/persistent
       - /opt/prophat/prophat_backend/src/python:/opt/iris/python/src
       - /opt/prophat/prophat_backend/pythonlib:/opt/iris/python/lib
-    ports:
-      - "80:52773"
     command: >
       --after "rm -rf /opt/iris/python/lib/* && pip3 install -r /opt/iris/python/src/requirements.txt --target /opt/iris/python/lib && iris session IRIS < /opt/iris/cfg/irisstart.script"
+  
+  webgateway:
+    image: prophat-web:latest
+    container_name: webgateway
+    hostname: webgateway
+    volumes:
+      - /opt/prophat/persistent/web:/persistent
+    ports:
+      - "80:80"

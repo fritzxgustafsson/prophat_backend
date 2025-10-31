@@ -1,4 +1,4 @@
-import iris
+import ph.iris
 from Joking import JOD
 
 def get_string():
@@ -8,4 +8,4 @@ def get_joke():
     return JOD()
 
 def get_iris_val():
-    return iris.cls("PH.test").getTestString()
+    return ph.iris.cls("PH.test").getTestString()
