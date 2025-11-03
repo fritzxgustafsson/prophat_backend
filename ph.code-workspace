@@ -1,7 +1,8 @@
 {
     "folders": [
         { "path": "./src" },
-        { "path": "./docker" }
+        { "path": "./docker" },
+        { "path": "../prophat_health_frontend" },
     ],
     "settings": {
         "intersystems.servers": {
