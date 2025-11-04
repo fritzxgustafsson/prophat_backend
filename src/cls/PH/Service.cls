@@ -3,70 +3,64 @@ Class PH.Service Extends %CSP.REST
 
 Parameter CONTENTTYPE = "application/json";
 
-Parameter SECURITYRESOURCE;
-
 XData UrlMap
 {
 <Routes>
-    <Route Url="/iris" Method="GET" Call="getIrisResponse"/>
-    <Route Url="/python" Method="GET" Call="getPythonResponse"/>
-    <Route Url="/pythonlib" Method="GET" Call="getPythonLibResponse"/>
-    <Route Url="/pythoniris" Method="GET" Call="getPythonIrisResponse"/>
-    <Route Url="/all" Method="GET" Call="getAllResponse"/>
+    <Route Url="/auth/login" Method="GET" Call="getLoginResponse"/>
+    <Route Url="/auth/validate" Method="GET" Call="getValidateResponse"/>
 </Routes>
 }
 
-ClassMethod getIrisResponse() As %Status
+ClassMethod getLoginResponse() As %Status
 {
-    write { "iris": "simple string" }.%ToJSON()
-    Quit $$$OK
+    set email = %request.Get("email")
+    set user = ##class(PH.model.auth.phUser).createForEmail(email)
+    if ('$IsObject(user)) {
+        set %response.Status = 401
+        return $$$OK
+    }
+
+    set password = %request.Get("password")
+    if ('user.isPasswordCorrect(password)) {
+        set %response.Status = 401
+        return $$$OK
+    }
+
+    write user.getLoginResponseObject().%ToJSON()
+    return $$$OK
 }
 
-ClassMethod getPythonResponse() As %Status
+ClassMethod getValidateResponse() As %Status
 {
-    write { "python": (..getPythonVal()) }.%ToJSON()
-    Quit $$$OK
+    set header = %request.GetCgiEnv("HTTP_AUTHORIZATION")
+    If header="" {
+        set %response.Status = 401
+        Quit $$$OK
+    }
+
+    Set token = $Piece(header," ",2)
+    If token="" {
+        set %response.Status = 401
+        Quit $$$OK
+    }
+
+    set isValid = ..isValidJwt(token)
+    if 'isValid {
+        set %response.Status = 401
+        Quit $$$OK
+    }
+
+    set responseObject = {}
+    set responseObject.valid = isValid
+
+    write responseObject.%ToJSON()
+    return $$$OK
 }
 
-ClassMethod getPythonVal() [ Language = python ]
+ClassMethod isValidJwt(token As %String) As %Boolean [ Language = python ]
 {
-    import ph.test
-    return ph.test.get_string()
-}
-
-ClassMethod getPythonLibResponse() As %Status
-{
-    write { "pythonLib": (..getPythonLibVal()) }.%ToJSON()
-    Quit $$$OK
-}
-
-ClassMethod getPythonLibVal() [ Language = python ]
-{
-    import ph.test
-    return ph.test.get_joke()
-}
-
-ClassMethod getPythonIrisResponse() As %Status
-{
-    write { "pythonIrisVal": (..getPythonIrisVal()) }.%ToJSON()
-    Quit $$$OK
-}
-
-ClassMethod getPythonIrisVal() [ Language = python ]
-{
-    import ph.test
-    return ph.test.get_iris_val()
-}
-
-ClassMethod getAllResponse() As %Status
-{
-    write {
-        "iris": "simple string",
-        "python": (..getPythonVal()),
-        "pythonLib": (..getPythonLibVal()),
-        "pythonIrisVal": (..getPythonIrisVal())
-    }.%ToJSON()
-    Quit $$$OK
+    import ph.utils.auth
+    return ph.utils.auth.is_jwt_valid(token)
 }
 
 }
