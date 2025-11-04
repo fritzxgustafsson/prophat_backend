@@ -1,4 +1,4 @@
-FROM intersystems/iris-community:latest-cd
+FROM containers.intersystems.com/intersystems/iris:2025.2
 
 USER root
 COPY docker/config/irisbuild.script /tmp/irisbuild.script
