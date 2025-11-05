@@ -1,4 +1,4 @@
-Class PH.Service Extends %CSP.REST
+Class PH.api.dispatch Extends %CSP.REST
 {
 
 Parameter CONTENTTYPE = "application/json";
@@ -6,9 +6,25 @@ Parameter CONTENTTYPE = "application/json";
 XData UrlMap
 {
 <Routes>
-    <Route Url="/auth/login" Method="GET" Call="getLoginResponse"/>
+    <Route Url="/auth/login" Method="POST" Call="getLoginResponse"/>
     <Route Url="/auth/validate" Method="GET" Call="getValidateResponse"/>
 </Routes>
+}
+
+ClassMethod OnPreDispatch(pUrl As %String, pMethod As %String, ByRef pContinue As %Boolean) As %Status
+{
+    set allowedOrigin = $Get(^zPhConfig("API", "AllowedOrigin"))
+    Do %response.SetHeader("Access-Control-Allow-Origin", allowedOrigin)
+    Do %response.SetHeader("Access-Control-Allow-Credentials", "true")
+
+    If pMethod = "OPTIONS" {
+        Set %response.Status = 204
+        Set pContinue = 0
+        Quit $$$OK
+    }
+
+    Set pContinue = 1
+    Quit $$$OK
 }
 
 ClassMethod getLoginResponse() As %Status
