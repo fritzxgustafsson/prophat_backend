@@ -10,8 +10,9 @@ XData UrlMap
 <Routes>
     <Route Url="/auth/login" Method="POST" Call="getLoginResponse"/>
     <Route Url="/auth/refresh" Method="GET" Call="getRefreshResponse"/>
-    <Route Url="/auth/users" Method="GET" Call="getUsersResponse"/>
     <Route Url="/auth/logout" Method="GET" Call="getLogoutResponse"/>
+    <Route Url="/auth/createUser" Method="POST" Call="getCreateUserResponse"/>
+    <Route Url="/auth/users" Method="GET" Call="getUsersResponse"/>
 </Routes>
 }
 
@@ -56,8 +57,52 @@ ClassMethod getLogoutResponse() As %Status
     do ##class(PH.db.auth.refreshToken).deleteForToken(refreshToken)
     do %response.SetCookie("refresh_token", "", "", "/", "", 0, 1, "Strict")
 
-    write {"status": "loggedOut"}.%ToJSON()
+    write {"status": "success"}.%ToJSON()
     Quit $$$OK
+}
+
+ClassMethod getCreateUserResponse() As %Status
+{
+    set header = %request.GetCgiEnv("HTTP_AUTHORIZATION")
+    If header="" {
+        set %response.Status = 401
+        Quit $$$OK
+    }
+
+    Set token = $Piece(header," ",2)
+    If token="" {
+        set %response.Status = 401
+        Quit $$$OK
+    }
+
+    set isValid = ..isValidJwt(token)
+    if 'isValid {
+        set %response.Status = 401
+        Quit $$$OK
+    }
+
+    set email = %request.Get("email")
+    set password = %request.Get("password")
+    set accessRole = %request.Get("access_role")
+    set firstname = %request.Get("firstname")
+    set lastname = %request.Get("lastname")
+
+    if (email = "") || (password = "") || (accessRole = "") {
+        set %response.Status = 400
+        return $$$OK
+    }
+
+    set user = ##class(PH.db.auth.phUser).%New()
+    set user.createdAt = ##class(%UTC).NowUTC()
+    set user.email = email
+    set user.passwordHash = ##class(PH.db.auth.phUser).getHasehedPassword(password)
+    set user.accessRole = accessRole
+    set user.firstname = firstname
+    set user.lastname = lastname
+    do user.%Save()
+
+    write {"status": "success"}.%ToJSON()
+    return $$$OK
 }
 
 ClassMethod getUsersResponse() As %Status
@@ -80,16 +125,8 @@ ClassMethod getUsersResponse() As %Status
         Quit $$$OK
     }
 
-    set responseObject = []
-    do responseObject.%Push({
-        "email": "admin@prophat.com",
-        "access_role": "admin",
-        "created_at": "2024-01-01 12:00:00",
-        "firstname": "Admin",
-        "lastname": "User"
-    })
-
-    write responseObject.%ToJSON()
+    set users = ##class(PH.model.auth.phUserList).createForAllUsers()
+    write users.getApiResponseObject().%ToJSON()
     return $$$OK
 }
 

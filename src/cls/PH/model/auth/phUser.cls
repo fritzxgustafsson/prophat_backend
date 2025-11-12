@@ -9,6 +9,12 @@ Property passwordHash As %String [ Private ];
 
 Property accessRole As %String(VALUELIST = ",admin,member") [ Private ];
 
+Property createdAt As %TimeStamp;
+
+Property firstname As %String;
+
+Property lastname As %String;
+
 ClassMethod getDbObjectForIdentifier(identifier As %String) As PH.db.auth.phUser [ Private ]
 {
     return ##class(PH.db.auth.phUser).%OpenId(identifier)
@@ -59,6 +65,9 @@ Method loadFromDb(dbUser As PH.db.auth.phUser) [ Private ]
     set ..email = dbUser.email
     set ..passwordHash = dbUser.passwordHash
     set ..accessRole = dbUser.accessRole
+    set ..createdAt = dbUser.createdAt
+    set ..firstname = dbUser.firstname
+    set ..lastname = dbUser.lastname
 }
 
 Method isPasswordCorrect(password As %String) As %Boolean
@@ -91,6 +100,17 @@ Method generateRefreshToken() As %String
         SET phUser = :userIdentifier, token = :refreshToken, expiresAt = :expiryTimestamp
     )
     return refreshToken
+}
+
+Method getApiResponseObject() As %DynamicObject
+{
+    return {
+        "email": (..email),
+        "access_role": (..accessRole),
+        "created_at": (..createdAt),
+        "firstname": (..firstname),
+        "lastname": (..lastname)
+    }
 }
 
 }
