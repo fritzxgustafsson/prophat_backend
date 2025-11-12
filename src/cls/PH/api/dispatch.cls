@@ -11,6 +11,7 @@ XData UrlMap
     <Route Url="/auth/login" Method="POST" Call="getLoginResponse"/>
     <Route Url="/auth/refresh" Method="GET" Call="getRefreshResponse"/>
     <Route Url="/auth/users" Method="GET" Call="getUsersResponse"/>
+    <Route Url="/auth/logout" Method="GET" Call="getLogoutResponse"/>
 </Routes>
 }
 
@@ -46,6 +47,16 @@ ClassMethod getRefreshResponse() As %Status
     }
 
     write user.getLoginResponseObject().%ToJSON()
+    Quit $$$OK
+}
+
+ClassMethod getLogoutResponse() As %Status
+{
+    set refreshToken = %request.GetCookie("refresh_token")
+    do ##class(PH.db.auth.refreshToken).deleteForToken(refreshToken)
+    do %response.SetCookie("refresh_token", "", "", "/", "", 0, 1, "Strict")
+
+    write {"status": "loggedOut"}.%ToJSON()
     Quit $$$OK
 }
 
