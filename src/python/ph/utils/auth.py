@@ -1,6 +1,6 @@
 import bcrypt
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 def hash_password(plain_password: str) -> str:
     salt = bcrypt.gensalt(rounds=12)
@@ -18,7 +18,7 @@ def is_password_correct(plain_password: str, hashed_password: str) -> bool:
 def generate_jwt(email: str) -> str:
     payload = {
         'sub': email,
-        'exp': datetime.utcnow() + timedelta(minutes=1)
+        'exp': datetime.now(timezone.utc) + timedelta(minutes=15)
     }
     token = jwt.encode(payload, 'my-shared-secret', algorithm='HS256')
     return token

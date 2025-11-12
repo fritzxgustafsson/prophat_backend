@@ -20,6 +20,16 @@ ClassMethod createNew() As PH.model.auth.phUser
     return user
 }
 
+ClassMethod createForRefreshToken(refreshToken As %String) As PH.model.auth.phUser
+{
+    set identifier = ##class(PH.db.auth.refreshToken).getUserIdentifierForToken(refreshToken)
+    if (identifier = "") {
+        return ""
+    }
+
+    return ..createForIdentifier(identifier)
+}
+
 ClassMethod createForEmail(email As %String) As PH.model.auth.phUser
 {
     set identifier = ##class(PH.db.auth.phUser).getIdentifierForEmail(email)
@@ -63,17 +73,24 @@ Method isPasswordCorrect(password As %String) As %Boolean
 
 Method getLoginResponseObject() As %DynamicObject
 {
+    set authModule = ##class(%SYS.Python).Import("ph.utils.auth")
+
     set responseObject = {}
-    set responseObject."access_token" = ..generateJwt()
-    set responseObject."expires_in" = 900
+    set responseObject."access_token" = authModule."generate_jwt"(..email)
 
     return responseObject
 }
 
-Method generateJwt() As %String [ Private ]
+Method generateRefreshToken() As %String
 {
-    set authModule = ##class(%SYS.Python).Import("ph.utils.auth")
-    return authModule."generate_jwt"(..email)
+    set refreshToken = $System.Encryption.Base64Encode($System.Util.CreateGUID())
+    set userIdentifier = ..identifier
+    set expiryTimestamp = $System.SQL.DATEADD("dd", 7, ##class(%UTC).NowUTC())
+    &SQL(
+        INSERT INTO PH_db_auth.refreshToken 
+        SET phUser = :userIdentifier, token = :refreshToken, expiresAt = :expiryTimestamp
+    )
+    return refreshToken
 }
 
 }

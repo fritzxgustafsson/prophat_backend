@@ -3,28 +3,15 @@ Class PH.api.dispatch Extends %CSP.REST
 
 Parameter CONTENTTYPE = "application/json";
 
+Parameter HandleCorsRequest = 1;
+
 XData UrlMap
 {
 <Routes>
     <Route Url="/auth/login" Method="POST" Call="getLoginResponse"/>
-    <Route Url="/auth/validate" Method="GET" Call="getValidateResponse"/>
+    <Route Url="/auth/refresh" Method="GET" Call="getRefreshResponse"/>
+    <Route Url="/auth/users" Method="GET" Call="getUsersResponse"/>
 </Routes>
-}
-
-ClassMethod OnPreDispatch(pUrl As %String, pMethod As %String, ByRef pContinue As %Boolean) As %Status
-{
-    set allowedOrigin = $Get(^zPhConfig("API", "AllowedOrigin"))
-    Do %response.SetHeader("Access-Control-Allow-Origin", allowedOrigin)
-    Do %response.SetHeader("Access-Control-Allow-Credentials", "true")
-
-    If pMethod = "OPTIONS" {
-        Set %response.Status = 204
-        Set pContinue = 0
-        Quit $$$OK
-    }
-
-    Set pContinue = 1
-    Quit $$$OK
 }
 
 ClassMethod getLoginResponse() As %Status
@@ -42,11 +29,27 @@ ClassMethod getLoginResponse() As %Status
         return $$$OK
     }
 
+    set refreshToken = user.generateRefreshToken()
+    do %response.SetCookie("refresh_token", refreshToken, "", "/", "", 0, 1, "Strict")
+
     write user.getLoginResponseObject().%ToJSON()
     return $$$OK
 }
 
-ClassMethod getValidateResponse() As %Status
+ClassMethod getRefreshResponse() As %Status
+{
+    set refreshToken = %request.GetCookie("refresh_token")
+    set user = ##class(PH.model.auth.phUser).createForRefreshToken(refreshToken)
+    if ('$IsObject(user)) {
+        set %response.Status = 401
+        Quit $$$OK
+    }
+
+    write user.getLoginResponseObject().%ToJSON()
+    Quit $$$OK
+}
+
+ClassMethod getUsersResponse() As %Status
 {
     set header = %request.GetCgiEnv("HTTP_AUTHORIZATION")
     If header="" {
@@ -66,8 +69,14 @@ ClassMethod getValidateResponse() As %Status
         Quit $$$OK
     }
 
-    set responseObject = {}
-    set responseObject.valid = isValid
+    set responseObject = []
+    do responseObject.%Push({
+        "email": "admin@prophat.com",
+        "access_role": "admin",
+        "created_at": "2024-01-01 12:00:00",
+        "firstname": "Admin",
+        "lastname": "User"
+    })
 
     write responseObject.%ToJSON()
     return $$$OK
