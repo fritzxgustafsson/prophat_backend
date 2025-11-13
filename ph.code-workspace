@@ -1,8 +1,17 @@
 {
     "folders": [
-        { "path": "./src" },
-        { "path": "./docker" },
-        { "path": "../prophat_health_frontend" },
+        {
+            "name": "backend",
+            "uri": "isfs://dockeriris:prophat/?mapped=0"
+        },
+        {
+            "name": "frontend",
+            "path": "../prophat_health_frontend"
+        },
+        {
+            "name": "docker",
+            "path": "docker"
+        }
     ],
     "settings": {
         "intersystems.servers": {
@@ -21,11 +30,7 @@
             "ns": "PROPHAT",
             "active": true
         },
-        "objectscript.export": {
-            "folder": "cls"
-        },
         "objectscript.compileOnSave": true,
-        "objectscript.overwriteServerChanges": true,
         "workbench.colorTheme": "InterSystems Default Dark Modern",
         "python.analysis.extraPaths": [
             "/opt/prophat/prophat_backend/src/python",
