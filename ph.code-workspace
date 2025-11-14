@@ -11,6 +11,9 @@
         {
             "name": "docker",
             "path": "docker"
+        },
+        {
+            "path": "src/cls"
         }
     ],
     "settings": {
@@ -19,7 +22,7 @@
                 "webServer": {
                     "scheme": "http",
                     "host": "localhost",
-                    "port": 80
+                    "port": 8080
                 },
                 "username": "_SYSTEM",
                 "password": "localdev"
