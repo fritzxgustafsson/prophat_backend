@@ -18,6 +18,7 @@ w ##class(Config.Databases).Create(codeDbName, .codeDbProperties)
 
 set nsProperties("Globals") = dataDbName
 set nsProperties("Routines") = codeDbName
+set nsProperties("Interop") = 1
 w ##class(Config.Namespaces).Create(nsName, .nsProperties)
 
 halt
