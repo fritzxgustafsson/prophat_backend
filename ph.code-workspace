@@ -1,19 +1,24 @@
 {
     "folders": [
         {
-            "name": "backend",
+            "name": "iris cls",
             "uri": "isfs://dockeriris:prophat/?mapped=0"
+        },
+        {
+            "name": "source cls",
+            "path": "src/cls"
+        },
+        {
+            "name": "python",
+            "path": "src/python"
         },
         {
             "name": "frontend",
             "path": "../prophat_health_frontend"
         },
         {
-            "name": "docker",
+            "name": "devOps",
             "path": "docker"
-        },
-        {
-            "path": "src/cls"
         }
     ],
     "settings": {
